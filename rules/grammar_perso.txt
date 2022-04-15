@@ -1,0 +1,32 @@
+
+NV_GN{
+	ALLWORDS $x, $y;
+	GROUP $gx, $gy;
+	
+	$x r_succ $y & $x r_isin $gx & $y r_isin $gy
+	& $gx == "NV:" & $gy == ["GN:", "GNDET:"];
+	$gx r_succ $gy;
+}
+
+GNinGV{
+	GROUP $x, $y;
+	GROUP @gv = "GV:";
+	$x r_succ $y & $x == "NV:" & $y == ["GN:", "GNDET:"];
+	$y r_isin @gv;
+}
+
+NVinGV{
+	GROUP $x, $y, $gv;
+	$x r_succ $y & $y r_isin $gv
+	& $x == "NV:" & $y == ["GN:", "GNDET:"] & $gv == "GV:";
+	$x r_isin $gv;
+}
+
+GN_GV{
+	ALLWORDS $x, $y;
+	GROUP $gx, $gy;
+	
+	$x r_succ $y & $x r_isin $gx & $y r_isin $gy
+	& $gx == ["GN:", "GNDET:"] & $gy == "NV:";
+	$gx r_succ $gy;
+}

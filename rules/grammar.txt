@@ -1,0 +1,517 @@
+PreDe{
+	WORD $x;
+	POS $other_pos;
+	$x == ["de", "d'"] & $x r_pos $other_pos
+	& $other_pos != "Pre:";
+	#weight($other_pos, -10);
+	
+}
+
+DetNotProSTART{
+	START $start;
+	ALLWORDS $x;
+	POS other_pos_x;
+	$start r_succ $x & $x r_pos "Det:" & $x !r_pos "Pro:*" & $x r_pos $other_pos_x
+	& $other_pos_x != ["Det:", "Gender:*", "Number:*"];
+	#weight($other_pos_x, -10);
+}
+
+ProSTART{
+	START $start;
+	ALLWORDS $x, $y;
+	POS $other_pos_x;
+	
+	$start r_succ $x & $x r_succ $y & $x r_pos $other_pos_x & $y r_pos "Ver:Inf" & $y !r_pos "Nom:"
+	& $x == ["Le", "La", "L'", "Les", "le", "la", "l'", "les"] & $other_pos_x != ["Pro:Pers:COD", "Number:*", "Gender:*"];
+	
+	#weight($other_pos_x, -10);
+}
+
+DetSTART{
+	START $start;
+	ALLWORDS $x, $y;
+	POS $other_pos_x;
+	
+	$start r_succ $x & $x r_succ $y & $x r_pos $other_pos_x & $y !r_pos "Ver:Inf"
+	& $x == ["Le", "La", "L'", "Les", "le", "la", "l'", "les"] & $other_pos_x != ["Det:", "Number:*", "Gender:*"];
+	
+	#weight($other_pos_x, -10);
+}
+
+DetNomSTART{
+	START $start;
+	ALLWORDS $x, $y;
+	POS $VerInf;
+	
+	$start r_succ $x & $x r_succ $y & $y r_pos $VerInf & $x r_pos "Det:" & $x !r_pos "Pro:Pers:COD"
+	& $x == ["Le", "La", "L'", "Les", "le", "la", "l'", "les"] & $VerInf == ["Ver:Inf", "Ver:"];
+	
+	#weight($VerInf, -10);
+}
+
+ProVerSTART{
+	START $start;
+	ALLWORDS $x, $y;
+	POS $VerInf;
+	
+	$start r_succ $x & $x r_succ $y & $y r_pos $VerInf & $x r_pos "Pro:Pers:COD" & $x !r_pos "Det:"
+	& $x == ["Le", "La", "L'", "Les", "le", "la", "l'", "les"] & $VerInf != ["Ver:Inf", "Ver:"];
+	
+	#weight($VerInf, -10);
+}
+
+//
+// GESTION DES PRO PERS SUJ 
+//
+
+PROSujVer{
+	ALLWORDS $x, $y;
+	POS $other_pos_y;
+	$x r_succ $y & $x r_pos "Pro:Pers:SUJ" & $y r_pos "Ver:Conjug" & $y r_pos $other_pos_y
+	& $other_pos_y != ["Ver:Conjug"];
+	#weight($other_pos_y, -10);
+}
+
+PROSujVerMULT{
+	ALLWORDS $x, $y;
+	POS $other_pos_x;
+	$x r_succ $y & $x r_pos "Pro:Pers:SUJ" & $y r_pos "Ver:Conjug" & $x r_pos $other_pos_x
+	& $other_pos_x != ["Pro:Pers:SUJ", "Gender:*", "Number:*"];
+	#weight($other_pos_x, -10);
+}
+
+
+ProSujLemma{
+	ALLWORDS $x;
+	LEMMA $l;
+	GROUP @GN = "GN:";
+	$x r_pos "Pro:Pers:SUJ" & $x r_lemma $l & $l r_pos "Pro:Pers:SUJ";
+	$l r_isin @GN;
+}
+
+ProSujInLemma{
+	ALLWORDS $x;
+	LEMMA $l;
+	GROUP $gn;
+	$x r_pos "Pro:Pers:SUJ" & $x r_lemma $l & $l r_isin $gn & $gn == "GN:";
+	$x r_isin $gn;
+}
+
+ProSujAlone{
+	ALLWORDS $x;
+	GROUP @GN = "GN:";
+	$x r_pos "Pro:Pers:SUJ" & $x !r_isin "GN:";
+	$x r_isin @GN;
+}
+
+//
+// RESTRICTION POS NOM/ADJ
+// CETTE RESTRICTION SE BASE SUR LA RELATION R_CARAC
+//
+
+DetNomAlone{
+	ALLWORDS $x, $y;
+	POS $other_pos_y, $pos_z;
+	$x r_succ $y & $y r_succ $z & $x r_pos "Det:"
+	& $y r_pos "Nom:" & $y r_pos $other_pos_y & $z !r_pos $pos_z
+	& $other_pos_y != ["Nom:", "Gender:*", "Number:*"] & $pos_z == ["Nom:", "Adj:"];
+	#weight($other_pos_y, -10);
+}
+
+DetNomEnd{
+	END $end;
+	ALLWORDS $x, $y;
+	POS $other_pos_y;
+	$x r_succ $y & $y r_succ $end & $x r_pos "Det:"
+	& $y r_pos "Nom:" & $y r_pos $other_pos_y
+	& $other_pos_y != ["Nom:", "Gender:*", "Number:*"];
+	#weight($other_pos_y, -10);
+}
+
+DetNomConjug{
+	ALLWORDS $x, $y, $z;
+	POS $other_pos_y;
+	$x r_succ $y & $y r_succ $z & $y r_pos $other_pos_y
+	& $x r_pos "Det:" & $y r_pos "Nom:" & $z r_pos "Ver:Conjug"
+	& $other_pos_y != ["Nom:", "Gender:*", "Number:*"];
+	#weight($other_pos_y, -10);
+}
+
+
+ConjugDetConjug{
+	ALLWORDS $x, $y, $z;
+	POS $other_pos_y, $other_pos_z;
+	$x r_succ $y & $y r_succ $z & $y r_pos $other_pos_y & $z r_pos $other_pos_z
+	& $x r_pos ["Ver:Conjug", "Ver:Inf"] & $y r_pos "Det:" & $z r_pos "Nom:" & $z r_pos ["Ver:Conjug", "Ver:Inf"]
+	& $other_pos_y != ["Det:", "Gender:*", "Number:*"] & $other_pos_z != ["Nom:", "Gender:*", "Number:*"];
+	#weight($other_pos_y, -10) & #weight($other_pos_z, -10);
+}
+
+CaracNomAdj01{
+	ALLWORDS $x, $y;
+	
+	$x r_succ $y 
+	& $x r_pos "Nom:"
+	& $x !r_pos ["Adj:", "Det:", "Ver:*", "Pro:*"] 
+	& $y r_pos "Adj:"
+	& $y !r_pos ["Det:", "Ver:Conjug", "Ver:PPre", "Ver:Inf", "Pro:*"];
+	
+	$x r_carac $y;
+}
+
+CaracAdjNom01{
+	ALLWORDS $x, $y;
+	
+	$y r_succ $x 
+	& $x r_pos "Nom:"
+	& $x !r_pos ["Adj:", "Det:", "Ver:*", "Pro:*"] 
+	& $y r_pos "Adj:"
+	& $y !r_pos ["Det:", "Ver:Conjug", "Ver:PPre", "Ver:Inf", "Pro:*"];
+	
+	$x r_carac $y;
+}
+
+CaracNomAdj02{
+	ALLWORDS $x, $y;
+	
+	$x r_succ $y
+	& $x r_pos "Nom:" & $x r_pos "Ver:Conjug"
+	& $x !r_lemma ["avoir", "être"]
+	//& $x !r_pos ["Det:", "Adj:", "Ver:PPas", "Ver:PPre", "Ver:Inf", "Pro:*"]
+	& $y r_pos ["Adj:", "Ver:PPas:"]
+	//& $y !r_pos ["Det:", "Nom:", "Ver:Conjug", "Ver:PPre", "Ver:Inf", "Pro:*"]
+	& $x !e_data "Ver:Etat";
+	
+	$x r_carac $y;
+}
+
+CaracAdjNom02{
+	ALLWORDS $x, $y;
+	
+	$y r_succ $x
+	& $x r_pos "Nom:" & $x r_pos "Ver:Conjug"
+	& $x !r_lemma ["avoir", "être"]
+	//& $x !r_pos ["Det:", "Adj:", "Ver:PPas", "Ver:PPre", "Ver:Inf", "Pro:*"]
+	& $y r_pos ["Adj:", "Ver:PPas:"]
+	//& $y !r_pos ["Det:", "Nom:", "Ver:Conjug", "Ver:PPre", "Ver:Inf", "Pro:*"]
+	& $x !e_data "Ver:Etat";
+	
+	$x r_carac $y;
+}
+
+CaracNomNom01{
+	ALLWORDS $x, $y;
+	
+	$x r_succ $y & $x !r_carac $y
+	& $x r_pos "Nom:" & $x r_pos "Adj:"
+	//& $x !r_pos ["Det:", "Ver:Conjug", "Ver:PPre", "Ver:Inf", "Pro:*"]
+	& $y r_pos "Nom:" & $y r_pos "Adj:"
+	//& $y !r_pos ["Det:", "Ver:Conjug", "Ver:PPre", "Ver:Inf", "Pro:*"]
+	& $x e_carac $y;
+	
+	$x r_carac $y;
+}
+
+CaracNomNom02{
+	ALLWORDS $x, $y;
+	
+	$y r_succ $x & $y !r_carac $x
+	& $x r_pos "Nom:" & $x r_pos "Adj:"
+	//& $x !r_pos ["Det:", "Ver:Conjug", "Ver:PPre", "Ver:Inf", "Pro:*"]
+	& $y r_pos "Nom:" & $y r_pos "Adj:"
+	//& $y !r_pos ["Det:", "Ver:Conjug", "Ver:PPre", "Ver:Inf", "Pro:*"]
+	& $x e_carac $y;
+	
+	$x r_carac $y;
+}
+
+CaracNomAdjVer01{
+	ALLWORDS $x, $y;
+	
+	$x r_succ $y & $x !r_carac $y
+	& $x r_pos "Nom:"
+	& $x !r_pos ["Adj:", "Det:", "Ver:Conjug", "Ver:PPre", "Ver:Inf", "Pro:*"]
+	& $y r_pos "Adj:" & $y r_pos "Ver:*"
+	& $y !r_pos ["Det:", "Pro:*"]
+	& $x e_carac $y;
+	
+	$x r_carac $y;
+}
+
+CaracNomAdjVer02{
+	ALLWORDS $x, $y;
+	
+	$y r_succ $x & $y !r_carac $x
+	& $x r_pos "Nom:"
+	& $x !r_pos ["Adj:", "Det:", "Ver:Conjug", "Ver:PPre", "Ver:Inf", "Pro:*"]
+	& $y r_pos "Adj:" & $y r_pos "Ver:*"
+	& $y !r_pos ["Det:", "Pro:*"]
+	& $x e_carac $y;
+	
+	$x r_carac $y;
+}
+
+// Des MWE peuvent prendre crée des relations carac non pertinentes
+DeleteFraudMWE{
+	ALLWORDS $other;
+	WORD $x;
+	MWE $mwe;
+	POS $pos;
+	
+	$mwe r_carac $x & $x r_carac $other & $mwe r_pos $pos;
+	#weight($mwe, -10) & #weight($pos, -10);
+}
+
+FilterNameCarac{
+	ALLWORDS $name, $adj;
+	POS $pos_name;
+	
+	$name r_carac $adj & $name r_pos $pos_name
+	& $pos_name != ["Nom:", "Gender:*", "Number:*"];
+	
+	#weight($pos_name, -10);
+}
+
+FilterAdjCarac{
+	ALLWORDS $name, $adj;
+	POS $pos_adj;
+	
+	$name r_carac $adj & $adj r_pos $pos_adj
+	& $pos_adj != ["Adj:", "Gender:*", "Number:*"];
+	
+	#weight($pos_adj, -10);
+}
+
+
+//
+// CONSTRUCTION DES GN
+// !! VERSION BANCALE POUR LA GESTION DES MWE !!
+//
+
+// Le nom est présent dans un MWE, le nom est étiqueté comme faisant parti d'un GN
+GNNomIn01{
+	ALLWORDS $x, $mwe;
+	GROUP @GN = "GN:";
+	$x r_isin $mwe & $x r_pos ["Nom:"] & $x !r_pos ["Adj:", "Ver:*", "Pro:*", "Det:", "Conj:", "Adv:"];
+	$x r_isin @GN;
+}
+
+// Le MWE englobant le nom est relié au GN précédemment créé
+GNNomIn02{
+	ALLWORDS $x, $mwe;
+	GROUP $gn;
+	$x r_isin $mwe & $x r_isin $gn & $mwe r_pos ["Nom:"] & $mwe !r_pos ["Adj:", "Ver:*", "Pro:*", "Det:", "Conj:", "Adv:"];
+	$mwe r_isin $gn;
+}
+
+// Le nom n'est pas présent dans MWE
+GNNomAlone{
+	ALLWORDS $x;
+	GROUP @GN = "GN:";
+	$x !r_isin "GN:" & $x r_pos ["Nom:"] & $x !r_pos ["Adj:", "Ver:*", "Pro:*", "Det:", "Conj:", "Adv:"];
+	$x r_isin @GN;
+}
+
+// Les noms présents dans le GN sont reliés comme étant des noyaux du GN
+HeadGn{
+	ALLWORDS $x;
+	GROUP $gn;
+	$x r_isin $gn & $x r_pos ["Nom:"];
+	$x r_head $gn;
+}
+
+// Les adjectifs sont reliés au GN
+GNAdj{
+	ALLWORDS $adj, $nom;
+	GROUP $gn;
+	$nom r_carac $adj & $nom r_isin $gn
+	& $gn == "GN:";
+	$adj r_isin $gn;
+}
+
+DelLemVer{
+	ALLWORDS $x;
+	LEMMA $lem_x;
+	POS $pos_lem;
+	$x r_isin "GN:" & $x r_lemma $lem_x & $lem_x r_pos $pos_lem
+	& $pos_lem == "Ver:Inf";
+	#weight($pos_lem, -10) & #weight($lem_x, -10); 
+}
+
+// Gestion des déterminants avec lemmatisation
+GNDet01{
+	ALLWORDS $det, $y;
+	POS $pos_det;
+	LEMMA $lem;
+	GROUP $gn;
+	GROUP @gndet = "GNDET:";
+	
+	$det r_succ $y & $det r_lemma $lem & $det r_pos $pos_det & $y r_isin $gn
+	& $pos_det == "Det:" & $gn == "GN:";
+	
+	$det r_isin @gndet;
+}
+
+GNDet02{
+	ALLWORDS $det;
+	LEMMA $lem;
+	GROUP $gn;
+	$det r_lemma $lem & $det r_isin $gn & $lem r_pos "Det:"
+	& $gn == "GNDET:";
+	$lem r_isin $gn;
+}
+
+// Gestion des déterminants sans lemmatisation
+GNDet03{
+	ALLWORDS $det, $y;
+	POS $pos_det;
+	GROUP $gn;
+	GROUP @gndet = "GNDET:";
+	$det r_succ $y & $det !r_isin "GNDET:" & $det r_pos $pos_det & $y r_isin $gn
+	& $pos_det == "Det:" & $gn == "GN:";
+	$det r_isin @gndet;
+}
+
+GNGNDET{
+	ALLWORDS $det, $y;
+	GROUP $gndet, $gn;
+	
+	$det r_succ $y & $det r_isin $gndet & $y r_isin $gn
+	& $gndet == "GNDET:" & $gn == "GN:";
+	
+	$gn r_isin $gndet;
+}
+
+FilterDet{
+	ALLWORDS $det;
+	POS $other_pos;
+	$det r_pos $other_pos & $det r_isin "GNDET:"
+	& $other_pos != ["Det:", "Gender:*", "Number:*"];
+	#weight($other_pos, -10);
+}
+
+TransHeadGN{
+	ALLWORDS $x;
+	GROUP $g1, $g2;
+	$x r_isin $g1 & $x r_head $g1 & $g1 r_isin $g2;
+	$x r_head $g2;
+}
+
+
+//
+// GESTION DU NOYAU VERBAL 
+//
+
+NV{
+	ALLWORDS $ver, $x;
+	GROUP $gn;
+	GROUP @nv = "NV:";
+	$x r_succ $ver & $x r_isin "GN:" & $ver r_pos "Ver:Conjug";
+	$ver r_isin @nv;
+}
+
+NV{
+	ALLWORDS $ver, $x, $se;
+	GROUP $gn;
+	GROUP @nv = "NV:";
+	$x r_succ $se & $se r_succ $ver & $x r_isin "GN:" & $ver r_pos "Ver:Conjug" & $se == ["se", "s'"];
+	$ver r_isin @nv;
+}
+
+NV{
+	ALLWORDS $se, $x;
+	GROUP $nv;
+	$se r_succ $x & $x r_isin $nv
+	& $se == ["se", "s'"] & $nv == "NV:";
+	$se r_isin $nv;
+}
+
+NVPPas{
+	ALLWORDS $ver, $ppas;
+	GROUP $nv;
+	$ver r_succ $ppas & $ver r_isin $nv & $ppas r_pos "Ver:PPas"
+	& $nv == "NV:";
+	$ppas r_isin $nv;
+}
+
+NVLemma{
+	ALLWORDS $ver, $lem;
+	GROUP $nv;
+	$ver r_isin $nv & $ver r_lemma $lem & $nv == "NV:";
+	$lem r_isin $nv;
+}
+
+NVMWE{
+	ALLWORDS $ver;
+	MWE $mwe;
+	GROUP $nv;
+	$ver r_isin $nv & $ver r_isin $mwe & $nv == "NV:";
+	$mwe r_isin $nv; 
+}
+
+FilterNV01{
+	ALLWORDS $x;
+	POS $pos;
+	GROUP $nv;
+	$x r_isin $nv & $x !r_pos ["Ver:*", "Pro:Pers:*"] & $x r_pos $pos & $nv == "NV:";
+	#weight($pos, -10) & #weight($x, -10);
+}
+
+FilterNV02{
+	ALLWORDS $x;
+	POS $other_pos;
+	GROUP $nv;
+	$x r_isin $nv & $x r_pos ["Ver:*", "Pro:Pers:*"] & $x r_pos $other_pos & $nv == "NV:"
+	& $other_pos != ["Ver:*", "Pro:Pers:*"];
+	#weight($other_pos, -10);
+}
+
+FilterPre{
+	ALLWORDS $x, $pre, $y;
+	GROUP $gx, $gy;
+	$x r_succ $pre & $pre r_succ $y & $pre r_pos "Pre:" & $x r_isin $gx & $y r_isin $gy;
+	$x r_succ $y;
+}
+
+NVtoGV{
+	GROUP $nv;
+	GROUP @gv = "GV:";
+	$nv == "NV:";
+	$nv r_isin @gv;
+}
+
+
+//
+// RELIER LES GROUPES ENTRE-EUX
+//
+
+NV_GN{
+	ALLWORDS $x, $y;
+	GROUP $gx, $gy, $gver;
+	
+	$x r_succ $y & $x r_isin $gx & $y r_isin $gy & $gx r_isin $gver
+	& $gx == "NV:" & $gy == ["GN:", "GNDET:"] & $gver == "GV:";
+	$gx r_succ $gy & $gy r_isin $gver;
+}
+
+NVinGV{
+	GROUP $x, $y, $gv;
+	$x r_succ $y & $y r_isin $gv
+	& $x == "NV:" & $y == ["GN:", "GNDET:"] & $gv == "GV:";
+	$x r_isin $gv;
+}
+
+GN_GV{
+	ALLWORDS $x, $y;
+	GROUP $gx, $gy, $gv;
+	
+	$x r_succ $y & $x r_isin $gx & $y r_isin $gy & $gy r_isin $gv
+	& $gx == ["GN:", "GNDET:"] & $gy == "NV:" & $gv == "GV:";
+	$gx r_succ $gy & $gx r_succ $gv;
+}
+
+ProgagGNGV{
+	GROUP $x, $y, $nxt;
+	$x r_isin $y & $x r_succ $nxt & $x == ["GN:", "GNDET:"];
+	$y r_succ $nxt
+}

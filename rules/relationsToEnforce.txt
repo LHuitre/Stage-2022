@@ -1,0 +1,35 @@
+carac{
+	ALLWORDS $x, $y;
+	$x == "idée" & $y == "brillante";
+	$x r_carac $y;
+}
+
+carac{
+	ALLWORDS $x, $y;
+	$x == "idée" & $y == "brillant";
+	$x r_carac $y;
+}
+
+carac{
+	ALLWORDS $x, $y;
+	$x == "chien" & $y == "gros";
+	$x r_carac $y;
+}
+
+carac{
+	ALLWORDS $x, $y;
+	$x == "chien" & $y == "noir";
+	$x r_carac $y;
+}
+
+carac{
+	ALLWORDS $x, $y;
+	$x == "chien noir" & $y == "gros";
+	$x r_carac $y;
+}
+
+carac{
+	ALLWORDS $x, $y;
+	$x == "gros chien" & $y == "noir";
+	$x r_carac $y;
+}

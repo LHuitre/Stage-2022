@@ -1,0 +1,11 @@
+/1/NomAdj
+/2/ALLWORDS $x, $y
+/2/POS $$01, $$02, $$03, $$04
+/4/$x r_succ $y/5/& $x r_pos $$02 & $$02 == ["Nom:"]/6/& $x !r_pos $$04 & $$04 == ["Adj:", "Det:", "Ver:*", "Pro:*"]/7/& $y r_pos $$03 & $$03 == ["Adj:"]/8/& $y !r_pos $$01 & $$01 == ["Nom:", "Ver:Conjug", "Ver:PPre", "Ver:Inf", "Pro:*"]
+/10/$x r_carac $y
+
+/13/AdjNom
+/14/ALLWORDS $x, $y
+/2/POS $$01, $$02, $$03, $$04
+/16/$x r_succ $y/17/& $x r_pos $$02 & $$02 == ["Nom:"]/18/& $x !r_pos $$04 & $$04 == ["Adj:", "Det:", "Ver:*", "Pro:*"]/19/& $y r_pos $$03 & $$03 == ["Adj:"]/20/& $y !r_pos $$01 & $$01 == ["Nom:", "Ver:Conjug", "Ver:PPre", "Ver:Inf", "Pro:*"]
+/22/$x r_carac $y

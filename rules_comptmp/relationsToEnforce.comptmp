@@ -1,0 +1,29 @@
+/1/carac
+/2/ALLWORDS $x, $y
+/3/$x == "idée" & $y == "brillante"
+/4/$x r_carac $y
+
+/7/carac
+/8/ALLWORDS $x, $y
+/9/$x == "idée" & $y == "brillant"
+/10/$x r_carac $y
+
+/13/carac
+/14/ALLWORDS $x, $y
+/15/$x == "chien" & $y == "gros"
+/16/$x r_carac $y
+
+/19/carac
+/20/ALLWORDS $x, $y
+/21/$x == "chien" & $y == "noir"
+/22/$x r_carac $y
+
+/25/carac
+/26/ALLWORDS $x, $y
+/27/$x == "chien noir" & $y == "gros"
+/28/$x r_carac $y
+
+/31/carac
+/32/ALLWORDS $x, $y
+/33/$x == "gros chien" & $y == "noir"
+/34/$x r_carac $y

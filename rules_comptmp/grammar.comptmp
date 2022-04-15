@@ -1,0 +1,323 @@
+/1/PreDe
+/2/WORD $x
+/3/POS $other_pos
+/4/$x == ["de", "d'"] & $x r_pos $other_pos/5/& $other_pos != "Pre:"
+/6/#weight($other_pos, -10)
+
+/10/DetNotProSTART
+/11/START $start
+/12/ALLWORDS $x
+/13/POS other_pos_x
+/14/$start r_succ $x & $x r_pos "Det:" & $x !r_pos "Pro:*" & $x r_pos $other_pos_x/15/& $other_pos_x != ["Det:", "Gender:*", "Number:*"]
+/16/#weight($other_pos_x, -10)
+
+/19/ProSTART
+/20/START $start
+/21/ALLWORDS $x, $y
+/22/POS $other_pos_x
+/24/$start r_succ $x & $x r_succ $y & $x r_pos $other_pos_x & $y r_pos "Ver:Inf" & $y !r_pos "Nom:"/25/& $x == ["Le", "La", "L'", "Les", "le", "la", "l'", "les"] & $other_pos_x != ["Pro:Pers:COD", "Number:*", "Gender:*"]
+/27/#weight($other_pos_x, -10)
+
+/30/DetSTART
+/31/START $start
+/32/ALLWORDS $x, $y
+/33/POS $other_pos_x
+/35/$start r_succ $x & $x r_succ $y & $x r_pos $other_pos_x & $y !r_pos "Ver:Inf"/36/& $x == ["Le", "La", "L'", "Les", "le", "la", "l'", "les"] & $other_pos_x != ["Det:", "Number:*", "Gender:*"]
+/38/#weight($other_pos_x, -10)
+
+/41/DetNomSTART
+/42/START $start
+/43/ALLWORDS $x, $y
+/44/POS $VerInf
+/46/$start r_succ $x & $x r_succ $y & $y r_pos $VerInf & $x r_pos "Det:" & $x !r_pos "Pro:Pers:COD"/47/& $x == ["Le", "La", "L'", "Les", "le", "la", "l'", "les"] & $VerInf == ["Ver:Inf", "Ver:"]
+/49/#weight($VerInf, -10)
+
+/52/ProVerSTART
+/53/START $start
+/54/ALLWORDS $x, $y
+/55/POS $VerInf
+/57/$start r_succ $x & $x r_succ $y & $y r_pos $VerInf & $x r_pos "Pro:Pers:COD" & $x !r_pos "Det:"/58/& $x == ["Le", "La", "L'", "Les", "le", "la", "l'", "les"] & $VerInf != ["Ver:Inf", "Ver:"]
+/60/#weight($VerInf, -10)
+
+/67/PROSujVer
+/68/ALLWORDS $x, $y
+/69/POS $other_pos_y
+/70/$x r_succ $y & $x r_pos "Pro:Pers:SUJ" & $y r_pos "Ver:Conjug" & $y r_pos $other_pos_y/71/& $other_pos_y != ["Ver:Conjug"]
+/72/#weight($other_pos_y, -10)
+
+/75/PROSujVerMULT
+/76/ALLWORDS $x, $y
+/77/POS $other_pos_x
+/78/$x r_succ $y & $x r_pos "Pro:Pers:SUJ" & $y r_pos "Ver:Conjug" & $x r_pos $other_pos_x/79/& $other_pos_x != ["Pro:Pers:SUJ", "Gender:*", "Number:*"]
+/80/#weight($other_pos_x, -10)
+
+/84/ProSujLemma
+/85/ALLWORDS $x
+/86/LEMMA $l
+/87/GROUP @GN = "GN:"
+/88/$x r_pos "Pro:Pers:SUJ" & $x r_lemma $l & $l r_pos "Pro:Pers:SUJ"
+/89/$l r_isin @GN
+
+/92/ProSujInLemma
+/93/ALLWORDS $x
+/94/LEMMA $l
+/95/GROUP $gn
+/96/$x r_pos "Pro:Pers:SUJ" & $x r_lemma $l & $l r_isin $gn & $gn == "GN:"
+/97/$x r_isin $gn
+
+/100/ProSujAlone
+/101/ALLWORDS $x
+/102/GROUP @GN = "GN:"
+/103/$x r_pos "Pro:Pers:SUJ" & $x !r_isin "GN:"
+/104/$x r_isin @GN
+
+/112/DetNomAlone
+/113/ALLWORDS $x, $y
+/114/POS $other_pos_y, $pos_z
+/115/$x r_succ $y & $y r_succ $z & $x r_pos "Det:"/116/& $y r_pos "Nom:" & $y r_pos $other_pos_y & $z !r_pos $pos_z/117/& $other_pos_y != ["Nom:", "Gender:*", "Number:*"] & $pos_z == ["Nom:", "Adj:"]
+/118/#weight($other_pos_y, -10)
+
+/121/DetNomEnd
+/122/END $end
+/123/ALLWORDS $x, $y
+/124/POS $other_pos_y
+/125/$x r_succ $y & $y r_succ $end & $x r_pos "Det:"/126/& $y r_pos "Nom:" & $y r_pos $other_pos_y/127/& $other_pos_y != ["Nom:", "Gender:*", "Number:*"]
+/128/#weight($other_pos_y, -10)
+
+/131/DetNomConjug
+/132/ALLWORDS $x, $y, $z
+/133/POS $other_pos_y
+/134/$x r_succ $y & $y r_succ $z & $y r_pos $other_pos_y/135/& $x r_pos "Det:" & $y r_pos "Nom:" & $z r_pos "Ver:Conjug"/136/& $other_pos_y != ["Nom:", "Gender:*", "Number:*"]
+/137/#weight($other_pos_y, -10)
+
+/141/ConjugDetConjug
+/142/ALLWORDS $x, $y, $z
+/143/POS $other_pos_y, $other_pos_z
+/144/$x r_succ $y & $y r_succ $z & $y r_pos $other_pos_y & $z r_pos $other_pos_z/145/& $x r_pos ["Ver:Conjug", "Ver:Inf"] & $y r_pos "Det:" & $z r_pos "Nom:" & $z r_pos ["Ver:Conjug", "Ver:Inf"]/146/& $other_pos_y != ["Det:", "Gender:*", "Number:*"] & $other_pos_z != ["Nom:", "Gender:*", "Number:*"]
+/147/#weight($other_pos_y, -10) & #weight($other_pos_z, -10)
+
+/150/CaracNomAdj01
+/151/ALLWORDS $x, $y
+/153/$x r_succ $y/154/& $x r_pos "Nom:"/155/& $x !r_pos ["Adj:", "Det:", "Ver:*", "Pro:*"]/156/& $y r_pos "Adj:"/157/& $y !r_pos ["Det:", "Ver:Conjug", "Ver:PPre", "Ver:Inf", "Pro:*"]
+/159/$x r_carac $y
+
+/162/CaracAdjNom01
+/163/ALLWORDS $x, $y
+/165/$y r_succ $x/166/& $x r_pos "Nom:"/167/& $x !r_pos ["Adj:", "Det:", "Ver:*", "Pro:*"]/168/& $y r_pos "Adj:"/169/& $y !r_pos ["Det:", "Ver:Conjug", "Ver:PPre", "Ver:Inf", "Pro:*"]
+/171/$x r_carac $y
+
+/174/CaracNomAdj02
+/175/ALLWORDS $x, $y
+/177/$x r_succ $y/178/& $x r_pos "Nom:" & $x r_pos "Ver:Conjug"/179/& $x !r_lemma ["avoir", "être"]/181/& $y r_pos ["Adj:", "Ver:PPas:"]/183/& $x !e_data "Ver:Etat"
+/185/$x r_carac $y
+
+/188/CaracAdjNom02
+/189/ALLWORDS $x, $y
+/191/$y r_succ $x/192/& $x r_pos "Nom:" & $x r_pos "Ver:Conjug"/193/& $x !r_lemma ["avoir", "être"]/195/& $y r_pos ["Adj:", "Ver:PPas:"]/197/& $x !e_data "Ver:Etat"
+/199/$x r_carac $y
+
+/202/CaracNomNom01
+/203/ALLWORDS $x, $y
+/205/$x r_succ $y & $x !r_carac $y/206/& $x r_pos "Nom:" & $x r_pos "Adj:"/208/& $y r_pos "Nom:" & $y r_pos "Adj:"/210/& $x e_carac $y
+/212/$x r_carac $y
+
+/215/CaracNomNom02
+/216/ALLWORDS $x, $y
+/218/$y r_succ $x & $y !r_carac $x/219/& $x r_pos "Nom:" & $x r_pos "Adj:"/221/& $y r_pos "Nom:" & $y r_pos "Adj:"/223/& $x e_carac $y
+/225/$x r_carac $y
+
+/228/CaracNomAdjVer01
+/229/ALLWORDS $x, $y
+/231/$x r_succ $y & $x !r_carac $y/232/& $x r_pos "Nom:"/233/& $x !r_pos ["Adj:", "Det:", "Ver:Conjug", "Ver:PPre", "Ver:Inf", "Pro:*"]/234/& $y r_pos "Adj:" & $y r_pos "Ver:*"/235/& $y !r_pos ["Det:", "Pro:*"]/236/& $x e_carac $y
+/238/$x r_carac $y
+
+/241/CaracNomAdjVer02
+/242/ALLWORDS $x, $y
+/244/$y r_succ $x & $y !r_carac $x/245/& $x r_pos "Nom:"/246/& $x !r_pos ["Adj:", "Det:", "Ver:Conjug", "Ver:PPre", "Ver:Inf", "Pro:*"]/247/& $y r_pos "Adj:" & $y r_pos "Ver:*"/248/& $y !r_pos ["Det:", "Pro:*"]/249/& $x e_carac $y
+/251/$x r_carac $y
+
+/255/DeleteFraudMWE
+/256/ALLWORDS $other
+/257/WORD $x
+/258/MWE $mwe
+/259/POS $pos
+/261/$mwe r_carac $x & $x r_carac $other & $mwe r_pos $pos
+/262/#weight($mwe, -10) & #weight($pos, -10)
+
+/265/FilterNameCarac
+/266/ALLWORDS $name, $adj
+/267/POS $pos_name
+/269/$name r_carac $adj & $name r_pos $pos_name/270/& $pos_name != ["Nom:", "Gender:*", "Number:*"]
+/272/#weight($pos_name, -10)
+
+/275/FilterAdjCarac
+/276/ALLWORDS $name, $adj
+/277/POS $pos_adj
+/279/$name r_carac $adj & $adj r_pos $pos_adj/280/& $pos_adj != ["Adj:", "Gender:*", "Number:*"]
+/282/#weight($pos_adj, -10)
+
+/292/GNNomIn01
+/293/ALLWORDS $x, $mwe
+/294/GROUP @GN = "GN:"
+/295/$x r_isin $mwe & $x r_pos ["Nom:"] & $x !r_pos ["Adj:", "Ver:*", "Pro:*", "Det:", "Conj:", "Adv:"]
+/296/$x r_isin @GN
+
+/300/GNNomIn02
+/301/ALLWORDS $x, $mwe
+/302/GROUP $gn
+/303/$x r_isin $mwe & $x r_isin $gn & $mwe r_pos ["Nom:"] & $mwe !r_pos ["Adj:", "Ver:*", "Pro:*", "Det:", "Conj:", "Adv:"]
+/304/$mwe r_isin $gn
+
+/308/GNNomAlone
+/309/ALLWORDS $x
+/310/GROUP @GN = "GN:"
+/311/$x !r_isin "GN:" & $x r_pos ["Nom:"] & $x !r_pos ["Adj:", "Ver:*", "Pro:*", "Det:", "Conj:", "Adv:"]
+/312/$x r_isin @GN
+
+/316/HeadGn
+/317/ALLWORDS $x
+/318/GROUP $gn
+/319/$x r_isin $gn & $x r_pos ["Nom:"]
+/320/$x r_head $gn
+
+/324/GNAdj
+/325/ALLWORDS $adj, $nom
+/326/GROUP $gn
+/327/$nom r_carac $adj & $nom r_isin $gn/328/& $gn == "GN:"
+/329/$adj r_isin $gn
+
+/332/DelLemVer
+/333/ALLWORDS $x
+/334/LEMMA $lem_x
+/335/POS $pos_lem
+/336/$x r_isin "GN:" & $x r_lemma $lem_x & $lem_x r_pos $pos_lem/337/& $pos_lem == "Ver:Inf"
+/338/#weight($pos_lem, -10) & #weight($lem_x, -10)
+
+/342/GNDet01
+/343/ALLWORDS $det, $y
+/344/POS $pos_det
+/345/LEMMA $lem
+/346/GROUP $gn
+/347/GROUP @gndet = "GNDET:"
+/349/$det r_succ $y & $det r_lemma $lem & $det r_pos $pos_det & $y r_isin $gn/350/& $pos_det == "Det:" & $gn == "GN:"
+/352/$det r_isin @gndet
+
+/355/GNDet02
+/356/ALLWORDS $det
+/357/LEMMA $lem
+/358/GROUP $gn
+/359/$det r_lemma $lem & $det r_isin $gn & $lem r_pos "Det:"/360/& $gn == "GNDET:"
+/361/$lem r_isin $gn
+
+/365/GNDet03
+/366/ALLWORDS $det, $y
+/367/POS $pos_det
+/368/GROUP $gn
+/369/GROUP @gndet = "GNDET:"
+/370/$det r_succ $y & $det !r_isin "GNDET:" & $det r_pos $pos_det & $y r_isin $gn/371/& $pos_det == "Det:" & $gn == "GN:"
+/372/$det r_isin @gndet
+
+/375/GNGNDET
+/376/ALLWORDS $det, $y
+/377/GROUP $gndet, $gn
+/379/$det r_succ $y & $det r_isin $gndet & $y r_isin $gn/380/& $gndet == "GNDET:" & $gn == "GN:"
+/382/$gn r_isin $gndet
+
+/385/FilterDet
+/386/ALLWORDS $det
+/387/POS $other_pos
+/388/$det r_pos $other_pos & $det r_isin "GNDET:"/389/& $other_pos != ["Det:", "Gender:*", "Number:*"]
+/390/#weight($other_pos, -10)
+
+/393/TransHeadGN
+/394/ALLWORDS $x
+/395/GROUP $g1, $g2
+/396/$x r_isin $g1 & $x r_head $g1 & $g1 r_isin $g2
+/397/$x r_head $g2
+
+/405/NV
+/406/ALLWORDS $ver, $x
+/407/GROUP $gn
+/408/GROUP @nv = "NV:"
+/409/$x r_succ $ver & $x r_isin "GN:" & $ver r_pos "Ver:Conjug"
+/410/$ver r_isin @nv
+
+/413/NV
+/414/ALLWORDS $ver, $x, $se
+/415/GROUP $gn
+/416/GROUP @nv = "NV:"
+/417/$x r_succ $se & $se r_succ $ver & $x r_isin "GN:" & $ver r_pos "Ver:Conjug" & $se == ["se", "s'"]
+/418/$ver r_isin @nv
+
+/421/NV
+/422/ALLWORDS $se, $x
+/423/GROUP $nv
+/424/$se r_succ $x & $x r_isin $nv/425/& $se == ["se", "s'"] & $nv == "NV:"
+/426/$se r_isin $nv
+
+/429/NVPPas
+/430/ALLWORDS $ver, $ppas
+/431/GROUP $nv
+/432/$ver r_succ $ppas & $ver r_isin $nv & $ppas r_pos "Ver:PPas"/433/& $nv == "NV:"
+/434/$ppas r_isin $nv
+
+/437/NVLemma
+/438/ALLWORDS $ver, $lem
+/439/GROUP $nv
+/440/$ver r_isin $nv & $ver r_lemma $lem & $nv == "NV:"
+/441/$lem r_isin $nv
+
+/444/NVMWE
+/445/ALLWORDS $ver
+/446/MWE $mwe
+/447/GROUP $nv
+/448/$ver r_isin $nv & $ver r_isin $mwe & $nv == "NV:"
+/449/$mwe r_isin $nv
+
+/452/FilterNV01
+/453/ALLWORDS $x
+/454/POS $pos
+/455/GROUP $nv
+/456/$x r_isin $nv & $x !r_pos ["Ver:*", "Pro:Pers:*"] & $x r_pos $pos & $nv == "NV:"
+/457/#weight($pos, -10) & #weight($x, -10)
+
+/460/FilterNV02
+/461/ALLWORDS $x
+/462/POS $other_pos
+/463/GROUP $nv
+/464/$x r_isin $nv & $x r_pos ["Ver:*", "Pro:Pers:*"] & $x r_pos $other_pos & $nv == "NV:"/465/& $other_pos != ["Ver:*", "Pro:Pers:*"]
+/466/#weight($other_pos, -10)
+
+/469/FilterPre
+/470/ALLWORDS $x, $pre, $y
+/471/GROUP $gx, $gy
+/472/$x r_succ $pre & $pre r_succ $y & $pre r_pos "Pre:" & $x r_isin $gx & $y r_isin $gy
+/473/$x r_succ $y
+
+/476/NVtoGV
+/477/GROUP $nv
+/478/GROUP @gv = "GV:"
+/479/$nv == "NV:"
+/480/$nv r_isin @gv
+
+/488/NV_GN
+/489/ALLWORDS $x, $y
+/490/GROUP $gx, $gy, $gver
+/492/$x r_succ $y & $x r_isin $gx & $y r_isin $gy & $gx r_isin $gver/493/& $gx == "NV:" & $gy == ["GN:", "GNDET:"] & $gver == "GV:"
+/494/$gx r_succ $gy & $gy r_isin $gver
+
+/497/NVinGV
+/498/GROUP $x, $y, $gv
+/499/$x r_succ $y & $y r_isin $gv/500/& $x == "NV:" & $y == ["GN:", "GNDET:"] & $gv == "GV:"
+/501/$x r_isin $gv
+
+/504/GN_GV
+/505/ALLWORDS $x, $y
+/506/GROUP $gx, $gy, $gv
+/508/$x r_succ $y & $x r_isin $gx & $y r_isin $gy & $gy r_isin $gv/509/& $gx == ["GN:", "GNDET:"] & $gy == "NV:" & $gv == "GV:"
+/510/$gx r_succ $gy & $gx r_succ $gv
+
+/513/ProgagGNGV
+/514/GROUP $x, $y, $nxt
+/515/$x r_isin $y & $x r_succ $nxt & $x == ["GN:", "GNDET:"]
+/516/$y r_succ $nxt
